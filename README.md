@@ -12,15 +12,18 @@
 <img src="https://github.com/PingguSoft/esp32_quadruped/blob/main/pics/quadruped_top.png?raw=true" width="60%">
 
 - ### Kangal
-  click to go to youtube video
   <div>
     <a href="https://www.youtube.com/watch?v=2IXcY3YnklY"><img src="https://img.youtube.com/vi/2IXcY3YnklY/0.jpg"/></a>
   </div>
+  
+  *click to youtube video*
 
 - ### SpotMicro
   <div>
     <a href="https://www.youtube.com/watch?v=9ieQvUIGtjo"><img src="https://img.youtube.com/vi/9ieQvUIGtjo/0.jpg"/></a>
   </div>
+  
+  *click to youtube video*
 
 ## Simulation
  - pose and walking simulation with [processing](https://processing.org/).
@@ -45,3 +48,14 @@
  
    <img src="https://github.com/PingguSoft/esp32_quadruped/blob/main/pics/gait_pattern.gif?raw=true" width="60%">
 
+## robot control with BLE(bluetooth le) joystick
+  | key        |    control    |  key      |  control          |
+  |----------- |---------------|-----------|-------------------|
+  | **A**      | walk / stop   | **L2+L1** | step interval-    |
+  | **B**      | gait change   | **L2+R1** | step interval+    |
+  | **X**      | balance mode  | **L2+X**  | step height-      |
+  | **Y**      | flash ledstrip| **L2+Y**  | step height+      |
+  | **THUMB-L**| save settings | **L2+A**  | step dist-        |
+  | **THUMB-R**| load settings | **L2+B**  | step dist+        |
+  | **DPAD-L** | toe offset-   | **R2+L1** | toe offset-       |
+  | **DPAD-R** | toe offset+   | **R2+R1** | toe offset+       |
