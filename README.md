@@ -59,3 +59,12 @@
   | **THUMB-R**| load settings | **L2+B**  | step dist+        |
   | **DPAD-L** | toe offset-   | **R2+L1** | toe offset-       |
   | **DPAD-R** | toe offset+   | **R2+R1** | toe offset+       |
+
+----
+# Reference
+  - IK model<br>
+    [12-DOF Quadrupedal Robot: InverseKinematics by Adham Elarabawy](https://www.adham-e.dev/pdf/IK_Model.pdf)
+  - Kangal cad files<br>
+    [Diy quadruped robot by Baris ALP](https://grabcad.com/library/diy-quadruped-robot-1)
+  - SpotMicro cad files<br>
+    [User Fran Ferri models](https://gitlab.com/public-open-source/spotmicroai/3dprinting/-/tree/master/User%20Fran%20Ferri%20models)
