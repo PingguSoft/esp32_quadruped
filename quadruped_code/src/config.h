@@ -70,8 +70,8 @@
 #define BODY_MAX_ROLL               30.0f   // (unit:degree)
 #define BODY_MAX_MOVE_MULT          3.0f
 
-#define WIFI_SSID                   "yourssid"
-#define WIFI_PASSWORD               "yourpass"
+#define WIFI_SSID                   "Xiaomi_home"
+#define WIFI_PASSWORD               "zlc011205"
 
 /*
 *****************************************************************************************
@@ -79,8 +79,8 @@
 *****************************************************************************************
 */
 #if (CONFIG_BODY == CONFIG_BODY_SPOTMICRO)
-    #define PIN_SCL0                22
-    #define PIN_SDA0                21
+    #define PIN_SCL0                19
+    #define PIN_SDA0                18
 
     #define PIN_LED_STRIP           14
     #define PIN_PWR_LED             13

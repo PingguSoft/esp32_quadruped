@@ -57,11 +57,18 @@ const struct Hardware::_joint Hardware::_kJointRanges[BODY_NUM_JOINTS] = {
 // top view
 #if (CONFIG_BODY == CONFIG_BODY_SPOTMICRO)
     struct Hardware::_servo_cfg Hardware::_cfgServos[BODY_NUM_LEGS][BODY_NUM_JOINTS] = {
+//  orig 
+        // //   coxa          femur         tibia            leg no.
+        // { { 12,  1, 0 }, { 13,  1, 0 }, { 14, -1, 0 } },  // right front
+        // { {  8, -1, 0 }, {  9,  1, 0 }, { 10, -1, 0 } },  // right rear
+        // { {  4, -1, 0 }, {  5, -1, 0 }, {  6,  1, 0 } },  // left  rear
+        // { {  0,  1, 0 }, {  1, -1, 0 }, {  2,  1, 0 } }   // left  front
+// 
         //   coxa          femur         tibia            leg no.
-        { { 12,  1, 0 }, { 13,  1, 0 }, { 14, -1, 0 } },  // right front
-        { {  8, -1, 0 }, {  9,  1, 0 }, { 10, -1, 0 } },  // right rear
-        { {  4, -1, 0 }, {  5, -1, 0 }, {  6,  1, 0 } },  // left  rear
-        { {  0,  1, 0 }, {  1, -1, 0 }, {  2,  1, 0 } }   // left  front
+        { {  3,  1, 0 }, {  4,  1, 0 }, {  5, -1, 0 } },  // right front
+        { {  9, -1, 0 }, { 10,  1, 0 }, { 11, -1, 0 } },  // right rear
+        { {  6, -1, 0 }, {  7, -1, 0 }, {  8,  1, 0 } },  // left  rear
+        { {  0,  1, 0 }, {  1, -1, 0 }, {  2,  1, 0 } }   // left  front        
     };
 #elif (CONFIG_BODY == CONFIG_BODY_KANGAL)
     // Please note that: The movement of the femur is effects to the tibia.

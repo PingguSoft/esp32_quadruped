@@ -436,6 +436,16 @@ uint16_t CommandHandler::filterDeadZone(uint16_t val) {
     if (1480 <= val && val <= 1520) {
         val = 1500;
     }
+    if (_isWalk == 0) {
+        // Check in which mode the robot is
+        if (val <= 1150) {
+            val = 1150;
+        }
+        if (val >= 1750) {
+            val = 1750;
+        }
+    }
+    // 1150 en 1750    
     return val;
 }
 
