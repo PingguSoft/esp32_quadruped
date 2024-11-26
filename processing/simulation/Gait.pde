@@ -1,38 +1,41 @@
-public abstract class Gait {
+public abstract class Gait { //<>//
     public final static float kUNIT_MM   = 1f;
     public final static float kPRECISION = 0.1f;
 
-    protected Vector    _vecStep;
-    protected float     _stepsPerSec;
-    protected GaitParam _paramLegs[] = new GaitParam[4];
-    protected float     _fFreq;
-    protected float     _fSwingAmplitude;
-    protected int       _iSwingLeg;
-    protected boolean   _isComp;
+    protected float           _fFreq;
+    protected GaitParam       _paramLegs[] = new GaitParam[4];
+    protected float           _fSwingAmplitude;
+    protected int             _iSwingLeg;
+    protected boolean         _isComp;
+    protected Vector          _vecStep;
+    protected float           _stepsPerSec;
+    
+    // Leg order : RF, RH, LH, LF
+    boolean IS_FRONT_LEG(int leg) {
+        return (leg == 0 || leg == 3);
+    }
+    
+    boolean IS_RIGHT_LEG(int leg) {
+        return (leg < 2);
+    }
     
     public Gait(float fSwingMult, float fStanceMult, float freq) {
-        _vecStep     = new Vector(20, 20, 40);
+        _fFreq     = freq;
+        _isComp    = false;
+        _iSwingLeg = -1;
+
+        _vecStep     = new Vector(20, 20, 20);
         _stepsPerSec = 1f;
-        _fFreq       = freq;
-        _isComp      = false;
-        _iSwingLeg   = -1;
-        
         for (int i = 0; i < _paramLegs.length; i++) {
             _paramLegs[i] = new GaitParam(fSwingMult, fStanceMult);
-        }
+            //_paramLegs[i].setMult(fSwingMult, fStanceMult);
+        }        
     }
 
-    public void    setComp(boolean en)        { _isComp  = en;              }
-    public void    setStep(Vector vecStep)    { _vecStep = vecStep;         }
-    public Vector  getStep()                  { return _vecStep;            }
-    public float   getStepsPerSec()           { return _stepsPerSec;        }
-    
-    public void setStepsPerSec(float steps) {
-        for (int i = 0; i < _paramLegs.length; i++) {
-            _paramLegs[i].reset();
-        }
-        _stepsPerSec = steps;
-    }
+    public void    setStep(Vector vecStep)                            { _vecStep = vecStep;         }
+    public Vector  getStep()                                          { return _vecStep;            }
+    public void    setStepsPerSec(float steps)                        { _stepsPerSec = steps;       }
+    public float   getStepsPerSec()                                   { return _stepsPerSec;        }
     
     protected void setSwingOffsets(float[] offsets) {
         for (int i = 0; i < _paramLegs.length; i++) {
@@ -40,46 +43,44 @@ public abstract class Gait {
         }
     }
     
-    protected Vector calcDirRatio(Vector dir) {
-        float maxV = max(abs(dir.x), abs(dir.y));
-        return new Vector(dir.x / maxV, dir.y / maxV, dir.z);
+    protected Vector calcMoveRatio(Vector mov) {
+        float maxV = max(abs(mov.x), abs(mov.y));
+        return new Vector(mov.x / maxV, mov.y / maxV);
     }
     
-    public void doStep(int leg, Vector dir, Rotator rot) {
-        
-        if (abs(dir.x) == kPRECISION && abs(dir.y) == kPRECISION) {
-            dir.set(0.0f, 0.0f, dir.z);
-            return;
+    public Vector doStep(int leg, Vector mov, Rotator rot) {
+        if (abs(mov.x) == kPRECISION && abs(mov.y) == kPRECISION) {
+            _paramLegs[leg].reset();
+            return new Vector(0.0f, 0.0f, mov.z);
         }
 
-        _paramLegs[leg].tick(dir, _vecStep, _fFreq, _stepsPerSec);
-        int    s = 1;// (leg < 2) ? 1 : -1;
-        Vector r = calcDirRatio(dir);
-        Vector c = new Vector(r.x * _paramLegs[leg].getAmplitude(), s * r.y * _paramLegs[leg].getAmplitude(), dir.z);
+        _paramLegs[leg].tick(mov, _vecStep, _fFreq, _stepsPerSec);
+        Vector r = calcMoveRatio(mov);
+        Vector c = new Vector(r.x * _paramLegs[leg].getAmplitude(), r.y * _paramLegs[leg].getAmplitude(), mov.z);
         
         if (_paramLegs[leg].isSwingState()) {
-            float w0 = _vecStep.x * Gait.kUNIT_MM * 4 * dir.x;
-            float l0 = _vecStep.y * Gait.kUNIT_MM / 2 * dir.y;
+            float w0 = _vecStep.x * Gait.kUNIT_MM / 2 * mov.x;
+            float l0 = _vecStep.y * Gait.kUNIT_MM * 4 * mov.y;
             float h0 = _vecStep.z * Gait.kUNIT_MM;
-            _iSwingLeg = leg;
+            
+            _iSwingLeg       = leg;
             _fSwingAmplitude = sqrt(abs((1 - sq(c.x / w0) - sq(c.y / l0)) * sq(h0)));
             c.z = c.z - _fSwingAmplitude;
         } else {
             if (_isComp && _iSwingLeg >= 0) {
                 float pct   = abs(_fSwingAmplitude / _vecStep.z);
-                float roll  = ((_iSwingLeg >= 2) ? pct : -pct) * 2.0f;
-                float pitch = ((_iSwingLeg == 1 || _iSwingLeg == 2) ? pct : -pct) * 2.0f;
-                
+                float roll  = (IS_RIGHT_LEG(_iSwingLeg) ? -pct : pct) * 2.0f;
+                float pitch = (IS_FRONT_LEG(_iSwingLeg) ? -pct : pct) * 2.0f;
+    
                 rot.set(rot.yaw, pitch, roll);
-            }
+            }            
             c.set(-c.x, -c.y, c.z);
         }
         
-        //if (leg == 0)
-        //print(String.format("tick:%3d, amplitude:%6.1f, swing:%d, (%6.1f, %6.1f)\n", _paramLegs[leg].getTick(), 
-        //    _paramLegs[leg].getAmplitude(), int(_paramLegs[leg].isSwingState()), c.x, c.z));
+        print(String.format("tick:%3d, leg:%d, amplitude:%6.1f, swing:%d, (%6.1f, %6.1f)\n", _paramLegs[leg].getTick(), 
+            leg, _paramLegs[leg].getAmplitude(), int(_paramLegs[leg].isSwingState()), c.x, c.z));
     
-        dir.set(c.x / Gait.kUNIT_MM, c.y / Gait.kUNIT_MM, c.z / Gait.kUNIT_MM);
+        return new Vector(c.x / Gait.kUNIT_MM, c.y / Gait.kUNIT_MM, c.z / Gait.kUNIT_MM);
     }
     
     abstract public String getName();    
@@ -92,7 +93,7 @@ public abstract class Gait {
 */
 public class GaitParam {
     private   float    _fAmplitude;
-    private   int      _tick;
+    private   short    _tick;
 
     private   boolean  _isSwing;
     private   float    _fCurMult;
@@ -100,14 +101,17 @@ public class GaitParam {
     private   float    _fStanceMult;
     private   float    _fSwingOffset;
     
+    
     public GaitParam(float fSwingMult, float fStanceMult) {
+        _tick        = 0;
         _fSwingMult  = fSwingMult;
         _fStanceMult = fStanceMult;
         setSwingState(false);
     }
     
     public void setSwingOffset(float fSwingOffset) {
-        _fSwingOffset = fSwingOffset;        
+        _fSwingOffset = fSwingOffset;
+        
         if (fSwingOffset == 0) {
             setSwingState(true);
         } else {
@@ -125,10 +129,10 @@ public class GaitParam {
         }
     }
     
-    protected void tick(Vector dir, Vector step, float freq, float stepsPerSec) {
+    protected void tick(Vector mov, Vector step, float freq, float stepsPerSec) {
         float full = round(freq * _fCurMult / stepsPerSec);
-        float w0   = step.x * Gait.kUNIT_MM / (2 / max(abs(dir.x), abs(dir.y)));
-        float a0   = (w0 * 2) * (float(_tick) / full) - w0;
+        float w0 = step.x * Gait.kUNIT_MM / (2 / max(abs(mov.x), abs(mov.y)));
+        float a0 = (w0 * 2) * (float(_tick) / full) - w0;
 
         _tick++;
         _fAmplitude = a0;
@@ -139,15 +143,34 @@ public class GaitParam {
         }
     }
     
-    public void reset() { 
+    void reset() {
         _tick = 0;
         setSwingOffset(_fSwingOffset);
+    }
+    
+    void setMult(float fSwingMult, float fStanceMult) {
+        _fSwingMult  = fSwingMult;
+        _fStanceMult = fStanceMult;
     }
     
     public boolean isSwingState()   { return _isSwing;  }
     public float   getAmplitude()   { return _fAmplitude;  }
     public int     getTick()        { return _tick; }
 }
+
+/*
+***************************************************************************************************
+* GaitPace
+***************************************************************************************************
+*/
+public class GaitPace extends Gait {
+    public GaitPace(float freq) {
+        super(1.0f, 1.0f, freq);                                    // leg order: RF, RH, LH, LF
+        setSwingOffsets(new float[] { 0, 0, 1, 1});                 // sequence : RF, RH -> LF, LH                  
+    }
+
+    public String getName() { return "Trot"; }
+};
 
 
 /*
@@ -157,33 +180,85 @@ public class GaitParam {
 */
 public class GaitTrot extends Gait {
     public GaitTrot(float freq) {
-        super(1.0f, 1.0f, freq);
-        setSwingOffsets(new float[] { 0, 1, 0, 1 });
+        super(1.0f, 1.0f, freq);                                    // leg order: RF, RH, LH, LF
+        setSwingOffsets(new float[] { 0, 1, 0, 1});                 // sequence : RF, LH -> RH, LF                  
     }
 
     public String getName() { return "Trot"; }
 };
 
+/*
+***************************************************************************************************
+* GaitLateral
+***************************************************************************************************
+*/
+public class GaitLateral extends Gait {
+    public GaitLateral(float freq) {
+        super(0.5f, 1.5f, freq);                                    // leg order: RF, RH, LH, LF
+        setSwingOffsets(new float[] { 0.0f, 1.5f, 0.5f, 1.0f });    // sequence : RF -> LH -> LF -> RH
+    }
+
+    public String getName() { return "Lateral"; }
+};
 
 /*
 ***************************************************************************************************
-* GaitCrawl
+* GaitDiagonal
 ***************************************************************************************************
 */
-public class GaitCrawl extends Gait {
-    public GaitCrawl(float freq) {
-        super(1.0f, 3.0f, freq);
-        setSwingOffsets(new float[] { 0, 3, 1, 2 });
-        setComp(true);
+public class GaitDiagonal extends Gait {
+    public GaitDiagonal(float freq) {
+        super(0.5f, 1.5f, freq);                                    // leg order: RF, RH, LH, LF
+        setSwingOffsets(new float[] { 0.0f, 0.5f, 1.5f, 1.0f });    // sequence : RF -> RH -> LF -> LH
     }
 
-    public String getName() { return "Crawl"; }
+    public String getName() { return "Diagonal"; }
+};
+
+
+/*
+***************************************************************************************************
+* GaitTripod - hexapod
+***************************************************************************************************
+*/
+public class GaitTripod extends Gait {
+    public GaitTripod(float freq) {
+        super(1.0f, 1.0f, freq); //<>//
+        setSwingOffsets(new float[] { 0, 1, 0, 1, 0, 1});
+    }
+
+    public String getName() { return "Tripod"; }
+};
+
+
+/*
+***************************************************************************************************
+* GaitWave - hexapod
+***************************************************************************************************
+*/
+public class GaitWave extends Gait {
+    public GaitWave(float freq) {
+        super(5.0f, 1.0f, freq);
+        setSwingOffsets(new float[] { 2, 1, 0, 3, 4, 5});
+    }
+
+    public String getName() { return "Wave"; }
 
 };
 
 
 /*
 ***************************************************************************************************
-* GaitRipple
+* GaitRipple - hexapod
 ***************************************************************************************************
 */
+public class GaitRipple extends Gait {
+    public GaitRipple(float freq) {
+        super(2.0f, 1.0f, freq);
+        //                            0  1  2  3  4  5
+        setSwingOffsets(new float[] { 2, 0, 1, 2, 1, 0});
+    }
+
+    public String getName() { return "Wave"; }
+
+};

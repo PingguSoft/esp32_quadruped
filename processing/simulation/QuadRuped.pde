@@ -232,8 +232,8 @@ boolean IS_RIGHT_LEG(int leg) {
 
 class QuadRuped {
     Leg       _legs[];
-    Vector   _vMov;
-    Rotator  _rRot;    // x-> pitch, y->roll, z->yaw
+    Vector    _vMov;
+    Rotator   _rRot;    // x-> pitch, y->roll, z->yaw
     Gait      _gait;
     boolean   _isWalk;
     int       _debugLegMask = 0x1;
@@ -250,7 +250,7 @@ class QuadRuped {
             _legs[i].enableDebug((_debugLegMask & mask) == mask);
             _legs[i].move(_vMov, _rRot);
         }
-        _gait = new GaitTrot(60);
+        _gait = new GaitDiagonal(60);
         println("-----------------------");
     }
 
@@ -311,7 +311,7 @@ class QuadRuped {
                 }
                 
                 Rotator rot = new Rotator(_rRot);
-                _gait.doStep(i, dir, rot);
+                dir = _gait.doStep(i, dir, rot);
                 
                 if (_legs[i].isDebugEnabled()) {
                     println(String.format("movpos leg:%d, (%6.1f, %6.1f, %6.1f), (P:%6.1f, R:%6.1f)", i, dir.x, dir.y, dir.z, rot.pitch, rot.roll));

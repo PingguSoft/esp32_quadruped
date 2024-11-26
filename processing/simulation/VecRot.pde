@@ -1,8 +1,16 @@
-final class Vector {
-    public float x, y, z;
+
+
+public class Vector {
+    public float x;
+    public float y;
+    public float z;
 
     public Vector() {
         set(0, 0, 0);
+    }
+
+    public Vector(float x, float y) {
+        set(x, y, 0);
     }
 
     public Vector(float x, float y, float z) {
@@ -19,35 +27,28 @@ final class Vector {
         this.z = z;
     }
 
-    void zero() {
+    public void zero() {
         set(0, 0, 0);
     }
 
-    public float x() {
-        return x;
+    public boolean equals(Vector v) {
+        return (x == v.x && y == v.y && z == v.z);
     }
 
-    public float y() {
-        return y;
+    void dump(String name) {
+        print(String.format("[%4s] x:%7.3f, y:%7.3f, z:%7.3f\n", name, x, y, z));
     }
+};
 
-    public float z() {
-        return z;
-    }
-    
-    public void dump(String name) {
-        println(String.format("[%4s] x:%7.3f, y:%7.3f, z:%7.3f", name, x, y, z));
-    }
-}
-
-
-final class Rotator {
-    public float yaw, pitch, roll;
+public class Rotator {
+    public float yaw;
+    public float pitch;
+    public float roll;
 
     public Rotator() {
         set(0, 0, 0);
     }
-    
+
     public Rotator(Rotator r) {
         set(r.yaw, r.pitch, r.roll);
     }
@@ -66,23 +67,15 @@ final class Rotator {
         this.roll = roll;
     }
 
-    void zero() {
+    public void zero() {
         set(0, 0, 0);
     }
 
-    public float yaw() {
-        return yaw;
+    public boolean equals(Rotator r) {
+        return (yaw == r.yaw && pitch == r.pitch && roll == r.roll);
     }
 
-    public float pitch() {
-        return pitch;
+    void dump(String name) {
+        print(String.format("[%4s] y:%7.3f, p:%7.3f, r:%7.3f\n", name, yaw, pitch, roll));
     }
-
-    public float roll() {
-        return roll;
-    }
-
-    public void dump(String name) {
-        println(String.format("[%4s] y:%7.3f, p:%7.3f, r:%7.3f", name, yaw, pitch, roll));
-    }
-}
+};

@@ -10,7 +10,7 @@ boolean  _done = false;
 int      _ctr  = 0;
 LegGraph _graph[] = new LegGraph[4];
 boolean  _start   = true;
-Gait     _gait    = new GaitTrot(kFREQ);
+Gait     _gait    = new GaitPace(kFREQ);
 
 void setup() {
     hint(ENABLE_KEY_REPEAT);
@@ -64,7 +64,7 @@ class LegGraph {
         rect(_x - 100, _y, 300, 200);
         
         Vector vec;
-        vec = _gait.doStep(_pos, kFREQ, _mov, _rot);
+        vec = _gait.doStep(_pos, _mov, _rot);
 
         if (_oldPx != Integer.MAX_VALUE && _oldPx != Integer.MAX_VALUE) {
             stroke(kCOLOR_1);

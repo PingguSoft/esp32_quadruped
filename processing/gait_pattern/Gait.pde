@@ -7,10 +7,10 @@ public abstract class Gait {
     protected float           _fSwingAmplitude;
     protected int             _iSwingLeg;
     protected boolean         _isComp;
-
-    protected Vector    _vecStep;
-    protected float     _stepsPerSec;
+    protected Vector          _vecStep;
+    protected float           _stepsPerSec;
     
+    // Leg order : RF, RH, LH, LF
     boolean IS_FRONT_LEG(int leg) {
         return (leg == 0 || leg == 3);
     }
@@ -24,7 +24,7 @@ public abstract class Gait {
         _isComp    = false;
         _iSwingLeg = -1;
 
-        _vecStep     = new Vector(20, 20, 10);
+        _vecStep     = new Vector(20, 20, 15);
         _stepsPerSec = 1f;
         for (int i = 0; i < _paramLegs.length; i++) {
             _paramLegs[i] = new GaitParam(fSwingMult, fStanceMult);
@@ -48,13 +48,13 @@ public abstract class Gait {
         return new Vector(mov.x / maxV, mov.y / maxV);
     }
     
-    public Vector doStep(int leg, float freq, Vector mov, Rotator rot) {
+    public Vector doStep(int leg, Vector mov, Rotator rot) {
         if (abs(mov.x) == kPRECISION && abs(mov.y) == kPRECISION) {
             _paramLegs[leg].reset();
             return new Vector(0.0f, 0.0f, mov.z);
         }
 
-        _paramLegs[leg].tick(mov, _vecStep, freq, _stepsPerSec);
+        _paramLegs[leg].tick(mov, _vecStep, _fFreq, _stepsPerSec);
         Vector r = calcMoveRatio(mov);
         Vector c = new Vector(r.x * _paramLegs[leg].getAmplitude(), r.y * _paramLegs[leg].getAmplitude(), mov.z);
         
@@ -160,13 +160,28 @@ public class GaitParam {
 
 /*
 ***************************************************************************************************
+* GaitPace
+***************************************************************************************************
+*/
+public class GaitPace extends Gait {
+    public GaitPace(float freq) {
+        super(1.0f, 1.0f, freq);                                    // leg order: RF, RH, LH, LF
+        setSwingOffsets(new float[] { 0, 0, 1, 1});                 // sequence : RF, RH -> LF, LH                  
+    }
+
+    public String getName() { return "Trot"; }
+};
+
+
+/*
+***************************************************************************************************
 * GaitTrot
 ***************************************************************************************************
 */
 public class GaitTrot extends Gait {
     public GaitTrot(float freq) {
-        super(2.0f, 2.0f, freq);
-        setSwingOffsets(new float[] { 0, 2, 0, 2});
+        super(1.0f, 1.0f, freq);                                    // leg order: RF, RH, LH, LF
+        setSwingOffsets(new float[] { 0, 1, 0, 1});                 // sequence : RF, LH -> RH, LF                  
     }
 
     public String getName() { return "Trot"; }
@@ -174,13 +189,13 @@ public class GaitTrot extends Gait {
 
 /*
 ***************************************************************************************************
-* GaitTripod
+* GaitLateral
 ***************************************************************************************************
 */
 public class GaitLateral extends Gait {
     public GaitLateral(float freq) {
-        super(1.0f, 3.0f, freq);
-        setSwingOffsets(new float[] { 2.0f, 0.5f, 2.5f, 0.0f });
+        super(0.5f, 1.5f, freq);                                    // leg order: RF, RH, LH, LF
+        setSwingOffsets(new float[] { 0.0f, 1.5f, 0.5f, 1.0f });    // sequence : RF -> LH -> LF -> RH
     }
 
     public String getName() { return "Lateral"; }
@@ -188,13 +203,13 @@ public class GaitLateral extends Gait {
 
 /*
 ***************************************************************************************************
-* GaitTripod
+* GaitDiagonal
 ***************************************************************************************************
 */
 public class GaitDiagonal extends Gait {
     public GaitDiagonal(float freq) {
-        super(1.0f, 3.0f, freq);
-        setSwingOffsets(new float[] { 1.8f, 3.0f, 1.2f, 0.0f});
+        super(0.5f, 1.5f, freq);                                    // leg order: RF, RH, LH, LF //<>//
+        setSwingOffsets(new float[] { 0.0f, 0.5f, 1.5f, 1.0f });    // sequence : RF -> RH -> LF -> LH
     }
 
     public String getName() { return "Diagonal"; }

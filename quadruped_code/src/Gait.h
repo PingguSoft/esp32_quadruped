@@ -24,6 +24,7 @@
                |
                | +Y
 */
+// Leg order : RF, RH, LH, LF
 
 /*
 *****************************************************************************************
@@ -147,25 +148,6 @@ protected:
 
 };
 
-
-/*
-*****************************************************************************************
-* GaitTrot
-*****************************************************************************************
-*/
-class GaitTrot : public Gait {
-private:
-    const float _offsets[BODY_NUM_LEGS] = {  0, 2, 0, 2 };          // RF, RH, LH, LF
-
-public:
-    GaitTrot(float freq) : Gait(2.0f, 2.0f, freq) {
-        setSwingOffsets(_offsets);
-    }
-    virtual ~GaitTrot() {}
-
-    String getName(void) { return "Trot"; }
-};
-
 #if 0
 /*
 *****************************************************************************************
@@ -188,15 +170,58 @@ public:
 
 /*
 *****************************************************************************************
+* GaitPace
+*****************************************************************************************
+*/
+class GaitPace : public Gait {
+private:
+    const float _offsets[BODY_NUM_LEGS] = { 0f, 0f, 1.0f, 1.0f };
+    // leg order: RF, RH, LH, LF
+    // sequence : RF, RH -> LF, LH
+
+public:
+    GaitPace(float freq) : Gait(1.0f, 1.0f, freq) {
+        setSwingOffsets(_offsets);
+        setComp(true);
+    }
+
+    String getName(void) { return "Pace"; }
+};
+
+
+/*
+*****************************************************************************************
+* GaitTrot
+*****************************************************************************************
+*/
+class GaitTrot : public Gait {
+private:
+    const float _offsets[BODY_NUM_LEGS] = {  0, 1, 0, 1 };
+    // leg order: RF, RH, LH, LF
+    // sequence : RF, LH -> RH, LF
+
+public:
+    GaitTrot(float freq) : Gait(1.0f, 1.0f, freq) {
+        setSwingOffsets(_offsets);
+    }
+    virtual ~GaitTrot() {}
+
+    String getName(void) { return "Trot"; }
+};
+
+/*
+*****************************************************************************************
 * GaitLateral
 *****************************************************************************************
 */
 class GaitLateral : public Gait {
 private:
-    const float _offsets[BODY_NUM_LEGS] = { 2.0f, 0.5f, 2.5f, 0.0f };  // RF, RH, LH, LF
+    const float _offsets[BODY_NUM_LEGS] = { 0.0f, 1.5f, 0.5f, 1.0f };
+    // leg order: RF, RH, LH, LF
+    // sequence : RF -> LH -> LF -> RH
 
 public:
-    GaitLateral(float freq) : Gait(1.0f, 3.0f, freq) {
+    GaitLateral(float freq) : Gait(0.5f, 1.5f, freq) {
         setSwingOffsets(_offsets);
         setComp(true);
     }
@@ -211,10 +236,12 @@ public:
 */
 class GaitDiagonal : public Gait {
 private:
-    const float _offsets[BODY_NUM_LEGS] = { 1.8f, 3.0f, 1.2f, 0.0f };  // RF, RH, LH, LF
+    const float _offsets[BODY_NUM_LEGS] = { 0.0f, 0.5f, 1.5f, 1.0f };
+    // leg order: RF, RH, LH, LF
+    // sequence : RF -> RH -> LF -> LH
 
 public:
-    GaitDiagonal(float freq) : Gait(1.0f, 3.0f, freq) {
+    GaitDiagonal(float freq) : Gait(0.5f, 1.5f, freq) {
         setSwingOffsets(_offsets);
         setComp(true);
     }
