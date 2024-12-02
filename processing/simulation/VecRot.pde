@@ -8,6 +8,10 @@ public class Vector {
     public Vector() {
         set(0, 0, 0);
     }
+    
+    public Vector(Vector v) {
+        set(v.x, v.y, v.z);
+    }
 
     public Vector(float x, float y) {
         set(x, y, 0);

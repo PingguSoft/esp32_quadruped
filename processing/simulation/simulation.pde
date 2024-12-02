@@ -164,8 +164,12 @@ void setup() {
     lights();
     //noCursor();
     frameRate(30);
+    //fullScreen(P3D);
+    com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(surface.getNative());
+    window.setResizable(true);
+    window.setMaximized(true, true);    
+    
     _cam.init();
-
     _origin  = new Vector(width / 2, height / 2, 0);
     _quad = new QuadRuped(kBodyWidth, kBodyHeight, kCoxaLength, kCoxaOffsetZ, kFemurLength, kTibiaLength);
 }
@@ -219,8 +223,8 @@ void keyPressed() {
         break;
 
     case 'p':
-        _quad.getRot().set(0, 0, 0);
-        _quad.getPos().set(0, 0, 0);
+        _quad.getRot().zero();
+        _quad.getPos().zero();
         break;
 
     case '0':
