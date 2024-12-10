@@ -197,20 +197,11 @@ void QuadRuped::update(unsigned long ts, boolean isWalk, Vector *pMov, Rotator *
     if (isWalk) {
         Vector  move;
         Rotator rot;
-        float   yaw = pRot->yaw;
 
-        rot.set(0, pRot->pitch, pRot->roll);  // clear yaw while moving
+        move.set(*pMov);
+        rot.set(*pRot);
         for (int i = 0; i < BODY_NUM_LEGS; i++) {
-            int sign = IS_RIGHT_LEG(i) ? 1 : -1;
-            if (pMov->x < 0) {
-                sign = -sign;
-            }
-            move.set(PRECISION + pMov->x + ((yaw / 8) * -sign),
-                     PRECISION + pMov->y + ((yaw / 8) *  sign),
-                     pMov->z);
-
             _pGait->doStep(i, &move, &rot, int(_debugLegMask & _BV(i)));
-
             _legs[i].move(&move, &rot);
             _pHW->setLeg(i, _legs[i].getJointPtr()->getCoxa() * 10.0f, _legs[i].getJointPtr()->getFemur() * 10.0f, _legs[i].getJointPtr()->getTibia() * 10.0f);
         }

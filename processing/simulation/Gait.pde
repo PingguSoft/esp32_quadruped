@@ -37,6 +37,10 @@ public abstract class Gait { //<>//
     public void    setStepsPerSec(float steps)                        { _stepsPerSec = steps;       }
     public float   getStepsPerSec()                                   { return _stepsPerSec;        }
     
+    public boolean isSwingState(int leg) {
+        return _paramLegs[leg].isSwingState();
+    }
+    
     protected void setSwingOffsets(float[] offsets) {
         for (int i = 0; i < _paramLegs.length; i++) {
             _paramLegs[i].setSwingOffset(offsets[i]);
@@ -48,7 +52,7 @@ public abstract class Gait { //<>//
         return new Vector(mov.x / maxV, mov.y / maxV);
     }
     
-    public Vector doStep(int leg, Vector mov) {
+    public Vector doStep(int leg, Vector mov, Rotator rot) {
         if (abs(mov.x) <= kPRECISION && abs(mov.y) <= kPRECISION) {
             _paramLegs[leg].reset();
             return new Vector(0.0f, 0.0f, mov.z);
@@ -67,13 +71,16 @@ public abstract class Gait { //<>//
             _fSwingAmplitude = sqrt(abs((1 - sq(c.x / w0) - sq(c.y / l0)) * sq(h0)));
             c.z = c.z - _fSwingAmplitude;
         } else {
-            //if (_isComp && _iSwingLeg >= 0) {
-            //    float pct   = abs(_fSwingAmplitude / _vecStep.z);
-            //    float roll  = (IS_RIGHT_LEG(_iSwingLeg) ? -pct : pct) * 2.0f;
-            //    float pitch = (IS_FRONT_LEG(_iSwingLeg) ? -pct : pct) * 2.0f;
-            //}            
-            c.set(-c.x, -c.y, c.z);
+            c.x = -c.x;
+            c.y = -c.y;
         }
+        
+        // rotation with yaw
+        float theta = radians(rot.yaw);
+        theta = (leg == 1 || leg == 3) ? -theta : theta;
+        float sintheta = sin(theta);
+        float costheta = cos(theta);
+        c.set(c.x * costheta - c.y * sintheta, c.x * sintheta + c.y * costheta, c.z);
         
         print(String.format("tick:%3d, leg:%d, amplitude:%6.1f, swing:%d, (%6.1f, %6.1f)\n", _paramLegs[leg].getTick(), 
             leg, _paramLegs[leg].getAmplitude(), int(_paramLegs[leg].isSwingState()), c.x, c.z));

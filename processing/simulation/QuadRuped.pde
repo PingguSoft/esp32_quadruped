@@ -1,5 +1,6 @@
 final color kCOLOR_BONE  = color(40, 200, 110);
 final color kCOLOR_JOINT = color(255, 255, 255);
+final color kCOLOR_JOINT2 = color(255, 255, 0);
 final color kCOLOR_BODY  = color(50, 150, 220);
 final color kCOLOR_HEAD  = color(255, 0, 0);
 final float kLEG_WIDTH   = 5.0f;
@@ -188,7 +189,7 @@ class Leg {
         sphere(kLEG_WIDTH);
     }
 
-    void draw() {
+    void draw(boolean isSwing) {
         pushMatrix();
 
         //
@@ -215,7 +216,8 @@ class Leg {
         fill(kCOLOR_BONE);
         box(kLEG_WIDTH, kLEG_WIDTH, _tibiaLength);
 
-        jointY(0, 0, _tibiaLength / 2, 0, kCOLOR_JOINT);
+        int col = isSwing ? kCOLOR_JOINT : kCOLOR_JOINT2;
+        jointY(0, 0, _tibiaLength / 2, 0, col);
 
         popMatrix();
     }
@@ -254,7 +256,7 @@ class QuadRuped {
             _legs[i].enableDebug((_debugLegMask & mask) == mask);
             _legs[i].move(_vMov, _rRot);
         }
-        _gait = new GaitLateral(60);
+        _gait = new GaitTrot(60);
         println("-----------------------");
     }
 
@@ -280,7 +282,7 @@ class QuadRuped {
 
         // legs
         for (int i = 0; i < _legs.length; i++) {
-            _legs[i].draw();
+            _legs[i].draw(_gait.isSwingState(i));
         }
         popMatrix();
     }
@@ -301,43 +303,42 @@ class QuadRuped {
 
         Vector move = new Vector(_vMov);
         Rotator rot = new Rotator(_rRot);            
-            
+
         if (isWalk) {
-            for (int i = 0; i < _legs.length; i++) {
+            for (int i = 0; i < 4; i++) {
                 move.set(Gait.kPRECISION + _vMov.x, Gait.kPRECISION + _vMov.y, _vMov.z);
 
                 if (_legs[i].isDebugEnabled()) {
                     println(String.format("move    leg:%d, %6.1f, %6.1f, %6.1f", i, move.x, move.y, move.z));
                 }
                 
-                move = _gait.doStep(i, move);
                 rot.set(_rRot);
-                if (IS_RIGHT_LEG(i)) {
-                     rot.yaw = -rot.yaw;
-                }
+                move = _gait.doStep(i, move, rot);
                 if (_legs[i].isDebugEnabled()) {
-                    println(String.format("movpos leg:%d, (%6.1f, %6.1f, %6.1f), (Y:%6.1f, P:%6.1f, R:%6.1f)", i, move.x, move.y, move.z, _rRot.yaw, _rRot.pitch, _rRot.roll));
+                    println(String.format("movpos leg:%d, (%6.1f, %6.1f, %6.1f), (Y:%6.1f, P:%6.1f, R:%6.1f)", i, move.x, move.y, move.z, rot.yaw, rot.pitch, rot.roll));
                 }
+                rot.zero();
                 _legs[i].move(move, rot);
+                println("-----------------------");
             }
         } else {
-            if (_vMov.equals(_vMovOld) && _rRot.equals(_rRotOld))
-                return;
-
-            _vMov.dump("_vMov");
-            _rRot.dump("_rRot");
-
-            for (int i = 0; i < _legs.length; i++) {
-                rot.set(_rRot);
-                if (IS_RIGHT_LEG(i)) {
-                   rot.yaw = -rot.yaw;
+            if (!_vMov.equals(_vMovOld) || !_rRot.equals(_rRotOld)) {
+                _vMov.dump("_vMov");
+                _rRot.dump("_rRot");
+    
+                for (int i = 0; i < _legs.length; i++) {
+                    rot.set(_rRot);
+                    if (IS_RIGHT_LEG(i)) {
+                       rot.yaw = -rot.yaw;
+                    }
+                    _legs[i].move(_vMov, rot);
                 }
-                _legs[i].move(_vMov, rot);
-            }
-        }  
         
-        _vMovOld.set(_vMov);
-        _rRotOld.set(_rRot);
-        println("-----------------------");
+                _vMovOld.set(_vMov);
+                _rRotOld.set(_rRot);
+                println("-----------------------");
+            }
+        }
+        draw();
     }
 }

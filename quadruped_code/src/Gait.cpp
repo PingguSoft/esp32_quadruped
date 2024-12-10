@@ -43,18 +43,18 @@ void Gait::doStep(int leg, Vector *move, Rotator *rot, bool enLog) {
         _fSwingAmplitude = sqrt(abs((1 - sq(c.x / w0) - sq(c.y / l0)) * sq(h0)));
         c.z = c.z - _fSwingAmplitude;
     } else {
-        if (_isComp && _iSwingLeg >= 0) {
-            float pct   = abs(_fSwingAmplitude / _vecStep.z);
-            float roll  = (IS_RIGHT_LEG(_iSwingLeg) ? -pct : pct) * 2.0f;
-            float pitch = (IS_FRONT_LEG(_iSwingLeg) ? -pct : pct) * 2.0f;
+        // if (_isComp && _iSwingLeg >= 0) {
+        //     float pct   = abs(_fSwingAmplitude / _vecStep.z);
+        //     float roll  = (IS_RIGHT_LEG(_iSwingLeg) ? -pct : pct) * 2.0f;
+        //     float pitch = (IS_FRONT_LEG(_iSwingLeg) ? -pct : pct) * 2.0f;
 
-            rot->set(rot->yaw, pitch, roll);
-        }
+        //     rot->set(rot->yaw, pitch, roll);
+        // }
         c.set(-c.x, -c.y, c.z);
     }
 
     if (enLog) {
-        LOG("tick:%3d, amplitude:%6.1f, swing:%d, (%6.1f, %6.1f, %6.1f)\n", _paramLegs[leg].getTick(), 
+        LOG("tick:%3d, amplitude:%6.1f, swing:%d, (%6.1f, %6.1f, %6.1f)\n", _paramLegs[leg].getTick(),
             _paramLegs[leg].getAmplitude(), int(_paramLegs[leg].isSwingState()), c.x, c.y, c.z);
     }
 

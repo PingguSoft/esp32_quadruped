@@ -163,7 +163,7 @@ void setup() {
     size(1280, 720, P3D);
     lights();
     //noCursor();
-    frameRate(30);
+    frameRate(60);
     //fullScreen(P3D);
     com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(surface.getNative());
     window.setResizable(true);
@@ -189,7 +189,6 @@ void draw() {
     background(0);
     drawPlane(_origin.x, _origin.y, _origin.z, 5000, 5000);
     _quad.update(_isWalk);
-    _quad.draw();
 }
 
 void keyPressed() {
